@@ -1,0 +1,9 @@
+*.swp
+*.swo
+ansible/gd2-*
+ansible/tendrl2-*
+.vagrant
+glusterd2
+glustercli
+tendrl2.conf.yml
+*.retry
