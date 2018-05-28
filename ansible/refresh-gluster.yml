@@ -1,0 +1,15 @@
+---
+
+- hosts: gluster4-servers
+  become: true
+  tasks:
+    - name: Stop glusterd2
+      systemd:
+        name: glusterd2
+        state: stopped
+    - name: Remove store data
+      shell: rm -rf /usr/local/var/lib/glusterd2/*
+    - name: Start glusterd2
+      systemd:
+        name: glusterd2
+        state: started

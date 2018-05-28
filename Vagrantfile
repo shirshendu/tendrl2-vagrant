@@ -217,6 +217,14 @@ Vagrant.configure(2) do |config|
           ansible.playbook = 'ansible/prepare-gluster.yml'
         end
 
+        machine.vm.provision :refresh_gluster, type: :ansible, run: :never do |ansible|
+          ansible.limit = 'all'
+          ansible.groups = {
+            'gluster4-servers' => ["gd2-[1:#{storage_node_count}]"]
+          }
+          ansible.playbook = 'ansible/refresh-gluster.yml'
+        end
+
         #if cluster_init
           #machine.vm.provision :deploy_cluster, type: :ansible do |ansible|
             #ansible.limit = 'all'
