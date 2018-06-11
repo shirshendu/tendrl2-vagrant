@@ -21,6 +21,17 @@
         dest: /usr/sbin/glusterd2
         mode: 0775
 
+    - name: Remove required directories
+      file:
+        state: absent
+        path: "{{ item }}"
+      with_items:
+        - /etc/glusterd2
+        - /usr/local/var/log/glusterd2
+        - /usr/local/var/lib/glusterd2
+        - /usr/local/var/run/glusterd2
+        - /usr/local/etc/glusterd2
+
     - name: Create required directories
       file:
         state: directory
