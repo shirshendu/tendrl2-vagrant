@@ -1,4 +1,4 @@
-- name: Deploy gluster
+- name: Backend Setup
 
   hosts: gluster4-servers
 
