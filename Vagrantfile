@@ -50,6 +50,7 @@ VMDISK = '512m'.freeze # size of brick disks in MB
 
 storage_node_count = -1
 disk_count = -1
+create_sample_volume = false
 
 tendrl_conf = YAML.load_file 'tendrl2.conf.yml'
 storage_node_count = tendrl_conf['storage_node_count'].to_i
@@ -224,7 +225,8 @@ Vagrant.configure(2) do |config|
           }
           ansible.extra_vars = {
           provider: ENV['VAGRANT_DEFAULT_PROVIDER'],
-          storage_node_count: storage_node_count
+          storage_node_count: storage_node_count,
+          create_sample_volume: create_sample_volume
           }
 
           ansible.playbook = 'ansible/backend-setup.yml'
