@@ -214,7 +214,7 @@ Vagrant.configure(2) do |config|
           ansible.groups = {
             'gluster4-servers' => ["gd2-[1:#{storage_node_count}]"]
           }
-          ansible.playbook = 'ansible/prepare-nodes.yml'
+          ansible.playbook = 'ansible/backend-setup.yml'
         end
 
         machine.vm.provision :prepare_gluster, type: :ansible do |ansible|
