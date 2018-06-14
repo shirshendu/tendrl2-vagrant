@@ -10,7 +10,7 @@
 
     - name: Generate gdeploy.conf
       template:
-        src: gdeploy-{{ provider }}.conf.j2
+        src: gdeploy-create-volume.conf.j2
         dest: "/tmp/gdeploy.conf"
 
     - name: Run GDeploy
