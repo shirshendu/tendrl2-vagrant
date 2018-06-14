@@ -1,0 +1,24 @@
+- name: Backend Setup
+
+  hosts: gluster4-servers
+
+  become: true
+
+  tasks:
+    - name: add gluster repo
+      yum:
+        name: centos-release-gluster
+        state: present
+
+    - name: Install gdeploy
+      yum:
+        name: gdeploy
+        state: present
+
+    - name: Generate gdeploy.conf
+      template:
+        src: gdeploy-{{ provider }}.conf.j2
+        dest: "/tmp/gdeploy.conf"
+
+    - name: Run GDeploy
+      shell: 'gdeploy -c /tmp/gdeploy.conf'

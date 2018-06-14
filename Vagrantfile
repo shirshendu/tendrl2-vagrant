@@ -208,6 +208,18 @@ Vagrant.configure(2) do |config|
           }
           ansible.playbook = 'ansible/prepare-environment.yml'
         end
+        
+        machine.vm.provision :backend_setup, type: :ansible do |ansible|
+          ansible.limit = 'all'
+          ansible.groups = {
+            'gluster4-servers' => ["gd2-[1:#{storage_node_count}]"]
+          }
+          ansible.extra_vars = {
+          provider: ENV['VAGRANT_DEFAULT_PROVIDER']
+          }
+
+          ansible.playbook = 'ansible/backend-setup.yml'
+        end
 
         machine.vm.provision :prepare_gluster, type: :ansible do |ansible|
           ansible.limit = 'all'
