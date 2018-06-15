@@ -1,0 +1,13 @@
+---
+- hosts: tendrl2-server
+  user: vagrant
+  become: yes
+  vars:
+    configure_firewalld_for_tendrl: false
+    etcd_fqdn: tendrl2-server.local
+    etcd_ip_address: 0.0.0.0
+    graphite_fqdn: tendrl2-server.local
+    tendrl_copr_repo: master
+  roles:
+    - tendrl-ansible.tendrl-copr
+    - tendrl2.server
