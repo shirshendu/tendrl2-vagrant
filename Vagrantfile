@@ -66,8 +66,8 @@ if disk_count < 1
 end
 
 if ARGV[0] != 'ssh-config' && ARGV[0] != 'ssh'
-  unless File.exist?('glusterd2')
-    puts 'Please provide a fresh glusterd2 binary in this folder'
+  unless File.exist?('builds/gd2/glusterd2')
+    puts 'Please provide a fresh glusterd2 binary in builds/gd2/'
     exit 1
   end
   puts 'Detected settings from tendrl2.conf.yml:'
@@ -120,46 +120,45 @@ Vagrant.configure(2) do |config|
 
   config.vm.network 'private_network', type: 'dhcp', auto_config: true
 
-  #config.vm.define 'tendrl2-server' do |machine|
-     ##Provider-independent options
-    #machine.vm.hostname = 'tendrl2-server'
-    #machine.vm.synced_folder '.', '/vagrant', disabled: true
+  config.vm.define 'tendrl2-server' do |machine|
+     #Provider-independent options
+    machine.vm.hostname = 'tendrl2-server'
+    machine.vm.synced_folder 'builds', '/vagrant', type: "rsync"
 
-    #machine.vm.provider 'virtualbox' do |vb, override|
-       ##Make this a linked clone for cow snapshot based root disks
-      #vb.linked_clone = true
+    machine.vm.provider 'virtualbox' do |vb, override|
+       #Make this a linked clone for cow snapshot based root disks
+      vb.linked_clone = true
 
-       ##Set VM resources
-      #vb.memory = VMMEM
-      #vb.cpus = VMCPU
+       #Set VM resources
+      vb.memory = VMMEM
+      vb.cpus = VMCPU
 
-       ##Don't display the VirtualBox GUI when booting the machine
-      #vb.gui = false
+       #Don't display the VirtualBox GUI when booting the machine
+      vb.gui = false
 
-       ##give this VM a proper name
-      #vb.name = "tendrl2-server"
+       #give this VM a proper name
+      vb.name = "tendrl2-server"
 
-       ##Accelerate SSH / Ansible connections (https://github.com/mitchellh/vagrant/issues/1807)
-      #vb.customize ['modifyvm', :id, '--natdnshostresolver1', 'on']
-      #vb.customize ['modifyvm', :id, '--natdnsproxy1', 'on']
-    #end
+       #Accelerate SSH / Ansible connections (https://github.com/mitchellh/vagrant/issues/1807)
+      vb.customize ['modifyvm', :id, '--natdnshostresolver1', 'on']
+      vb.customize ['modifyvm', :id, '--natdnsproxy1', 'on']
+    end
 
-    #machine.vm.provider 'libvirt' do |libvirt, override|
-       ##Set VM resources
-      #libvirt.memory = VMMEM
-      #libvirt.cpus = VMCPU
+    machine.vm.provider 'libvirt' do |libvirt, override|
+       #Set VM resources
+      libvirt.memory = VMMEM
+      libvirt.cpus = VMCPU
 
-       ##connect to local libvirt daemon as root
-      #libvirt.username = 'root'
-    #end
-  #end
+       #connect to local libvirt daemon as root
+      libvirt.username = 'root'
+    end
+  end
 
   (1..storage_node_count).each do |node_index|
     config.vm.define "gd2-#{node_index}" do |machine|
       # Provider-independent options
       machine.vm.hostname = "gd2-#{node_index}"
-      machine.vm.synced_folder '.', '/vagrant', disabled: true
-      machine.vm.synced_folder '/home/smukherjee/dev/redhat/tendrl/golang/src/github.com/gluster/glusterd2/build/', '/vagrant'
+      machine.vm.synced_folder 'builds', '/vagrant', type: "rsync"
 
       machine.vm.provider 'virtualbox' do |vb, override|
         # Make this a linked clone for cow snapshot based root disks
@@ -203,12 +202,12 @@ Vagrant.configure(2) do |config|
         machine.vm.provision :prepare_env, type: :ansible do |ansible|
           ansible.limit = 'all'
           ansible.groups = {
-            'gluster4-servers' => ["gd2-[1:#{storage_node_count}]"]
-            #'tendrl2-server' => ['tendrl2-server']
+            'gluster4-servers' => ["gd2-[1:#{storage_node_count}]"],
+            'tendrl2-server' => ['tendrl2-server']
           }
           ansible.playbook = 'ansible/prepare-environment.yml'
         end
-        
+
         machine.vm.provision :prepare_gluster, type: :ansible do |ansible|
           ansible.limit = 'all'
           ansible.groups = {
@@ -223,8 +222,8 @@ Vagrant.configure(2) do |config|
             'gluster4-servers' => ["gd2-[1:#{storage_node_count}]"]
           }
           ansible.extra_vars = {
-          provider: ENV['VAGRANT_DEFAULT_PROVIDER'],
-          storage_node_count: storage_node_count,
+            provider: ENV['VAGRANT_DEFAULT_PROVIDER'],
+            storage_node_count: storage_node_count,
           }
 
           ansible.playbook = 'ansible/backend-setup.yml'
@@ -238,42 +237,20 @@ Vagrant.configure(2) do |config|
           ansible.playbook = 'ansible/refresh-gluster.yml'
         end
 
-        #if cluster_init
-          #machine.vm.provision :deploy_cluster, type: :ansible do |ansible|
-            #ansible.limit = 'all'
-            #ansible.playbook = 'ansible/deploy-cluster.yml'
-            #ansible.groups = {
-              #'gluster-servers' => ["tendrl-node-[1:#{storage_node_count}]"]
-            #}
-            #ansible.extra_vars = {
-              #provider: ENV['VAGRANT_DEFAULT_PROVIDER'],
-              #storage_node_count: storage_node_count
-            #}
-          #end
-        #end
+        machine.vm.provision :deploy_tendrl, type: :ansible do |ansible|
+          ansible.limit = 'all'
+          ansible.groups = {
+            'tendrl2-server' => ['tendrl2-server']
+          }
+          ansible.playbook = 'ansible/tendrl2-server.yml'
+        end
 
-        #if tendrl_init
-          #ENV['ANSIBLE_ROLES_PATH'] = "#{ENV['ANSIBLE_ROLES_PATH']}:tendrl-ansible/roles"
-          #puts '  Pulling submodule Tendrl/tendrl-ansible'
-          #`git submodule init`
-          #`git submodule update`
-          #machine.vm.provision :deploy_tendrl, type: :ansible do |ansible|
-            #ansible.limit = 'all'
-            #ansible.groups = {
-              #'gluster-servers' => ["tendrl-node-[1:#{storage_node_count}]"],
-              #'tendrl-server' => ['tendrl-server']
-            #}
-            #ansible.playbook = 'ansible/tendrl-site.yml'
-          #end
-
-          #machine.vm.provision :update_tendrl, type: :ansible, run: 'never' do |ansible|
-            #ansible.limit = 'all'
-            #ansible.groups = {
-              #'gluster-servers' => ["tendrl-node-[1:#{storage_node_count}]"],
-              #'tendrl-server' => ['tendrl-server']
-            #}
-            #ansible.playbook = 'ansible/update-tendrl.yml'
-          #end
+        #machine.vm.provision :update_tendrl, type: :ansible, run: 'never' do |ansible|
+          #ansible.limit = 'all'
+          #ansible.groups = {
+            #'tendrl-server' => ['tendrl-server']
+          #}
+          #ansible.playbook = 'ansible/update-tendrl.yml'
         #end
       end
     end

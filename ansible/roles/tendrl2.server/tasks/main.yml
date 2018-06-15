@@ -1,0 +1,29 @@
+---
+# tasks file for tendrl-server
+
+- debug:
+    msg:
+      - "Using {{ etcd_fqdn }} as etcd fqdn in tendrl config files."
+      - "Using {{ etcd_ip_address }} as etcd ip address in etcd config file."
+      - "Using {{ graphite_fqdn }} as graphite fqdn in tendrl config files."
+
+- name: Install tendrl-selinux
+  yum:
+    name=tendrl-selinux
+    state=latest
+
+- include: firewalld.yml
+  when: configure_firewalld_for_tendrl == True
+- include: etcd.yml
+- include: tendrl-api.yml
+- include: tendrl-ui.yml
+
+- name: Enable httpd service
+  service:
+    name=httpd
+    enabled=yes
+
+- name: Start httpd service
+  service:
+    name=httpd
+    state=started

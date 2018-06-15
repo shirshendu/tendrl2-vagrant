@@ -17,7 +17,7 @@
     - name: Install GD2 built locally
       copy:
         remote_src: yes
-        src: /vagrant/glusterd2
+        src: /vagrant/gd2/glusterd2
         dest: /usr/sbin/glusterd2
         mode: 0775
 

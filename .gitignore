@@ -3,7 +3,7 @@
 ansible/gd2-*
 ansible/tendrl2-*
 .vagrant
-glusterd2
-glustercli
+builds/gd2/gluster*
+builds/tendrl2/tendrl2
 tendrl2.conf.yml
 *.retry
