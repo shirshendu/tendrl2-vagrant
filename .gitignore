@@ -1,7 +1,5 @@
 *.swp
 *.swo
-ansible/gd2-*
-ansible/tendrl2-*
 .vagrant
 builds/gd2/gluster*
 builds/tendrl2/tendrl2
