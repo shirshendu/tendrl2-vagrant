@@ -12,11 +12,13 @@
     name=tendrl-selinux
     state=latest
 
+- include: prometheus.yml
 - include: firewalld.yml
   when: configure_firewalld_for_tendrl == True
 - include: etcd.yml
 - include: tendrl-api.yml
 - include: tendrl-ui.yml
+
 
 - name: Enable httpd service
   service:

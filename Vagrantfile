@@ -203,7 +203,7 @@ Vagrant.configure(2) do |config|
           ansible.limit = 'all'
           ansible.groups = {
             'gluster4-servers' => ["gd2-[1:#{storage_node_count}]"],
-            'tendrl2-server' => ['tendrl2-server']
+            'tendrl2-servers' => ['tendrl2-server']
           }
           ansible.playbook = 'ansible/prepare-environment.yml'
         end
@@ -219,7 +219,7 @@ Vagrant.configure(2) do |config|
         machine.vm.provision :deploy_tendrl, type: :ansible do |ansible|
           ansible.limit = 'all'
           ansible.groups = {
-            'tendrl2-server' => ['tendrl2-server']
+            'tendrl2-servers' => ['tendrl2-server']
           }
           ansible.playbook = 'ansible/tendrl2-server.yml'
         end

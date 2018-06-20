@@ -1,0 +1,22 @@
+- name: create prometheus directory
+  file:
+    path: /home/vagrant/prometheus
+    state: directory
+
+- name: Download and Unarchive prometheus
+  unarchive:
+    src: https://github.com/prometheus/prometheus/releases/download/v2.3.0/prometheus-2.3.0.linux-amd64.tar.gz
+    dest: /home/vagrant/prometheus
+    remote_src: yes
+
+- name: Install prometheus service unit
+  copy:
+    src: prometheus.service
+    dest: /usr/lib/systemd/system/prometheus.service
+
+- name: Enable prometheus service and start it
+  systemd:
+    name: prometheus
+    daemon_reload: yes
+    state: restarted
+    enabled: yes

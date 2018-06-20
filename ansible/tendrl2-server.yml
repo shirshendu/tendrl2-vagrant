@@ -1,5 +1,5 @@
 ---
-- hosts: tendrl2-server
+- hosts: tendrl2-servers
   user: vagrant
   become: yes
   vars:
