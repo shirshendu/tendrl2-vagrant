@@ -16,6 +16,7 @@
 - include: firewalld.yml
   when: configure_firewalld_for_tendrl == True
 - include: etcd.yml
+- include: ansible-runner.yml
 - include: tendrl-api.yml
 - include: tendrl-ui.yml
 
