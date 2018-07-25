@@ -8,76 +8,45 @@
         url: http://artifacts.ci.centos.org/gluster/nightly/master.repo
         dest: /etc/yum.repos.d/gluster-nightly-master.repo
 
+    - name: add glusterd2 nightly repo
+      get_url:
+        url: http://artifacts.ci.centos.org/gluster/gd2-nightly/gd2-master.repo
+        dest: /etc/yum.repos.d/gd2-master.repo
+
+    - name: add gluster repo (for gdeploy i.e. backend-setup)
+      yum:
+        name: centos-release-gluster
+        state: present
+
     - name: Install GlusterFS Server
       yum:
         name: glusterfs-server
         state: present
 
-    - name: Install GD2 built locally
-      copy:
-        remote_src: yes
-        src: /vagrant/gd2/glusterd2
-        dest: /usr/sbin/glusterd2
-        mode: 0775
-
-    - name: Remove required directories
-      file:
-        state: absent
-        path: "{{ item }}"
-      with_items:
-        - /etc/glusterd2
-        - /usr/local/var/log/glusterd2
-        - /usr/local/var/lib/glusterd2
-        - /usr/local/var/run/glusterd2
-        - /usr/local/etc/glusterd2
-
-    - name: Create required directories
-      file:
-        state: directory
-        path: "{{ item }}"
-      with_items:
-        - /etc/glusterd2
-        - /usr/local/var/log/glusterd2
-        - /usr/local/var/lib/glusterd2
-        - /usr/local/var/run/glusterd2
-        - /usr/local/etc/glusterd2
-
-    - name: Install GD2 config file
-      template:
-        src: glusterd2.j2
-        dest: /usr/local/etc/glusterd2/glusterd2.toml
-
-    - name: Install GD2 service unit
-      copy:
-        src: glusterd2.service
-        dest: /usr/lib/systemd/system/glusterd2.service
+    - name: Install glusterd2
+      yum:
+        name: glusterd2
+        state: present
 
     - name: Enable GD2 service and start it
       systemd:
         name: glusterd2
         daemon_reload: yes
-        state: restarted
+        state: started
         enabled: yes
-
-    - name: add gluster repo
-      yum:
-        name: centos-release-gluster
-        state: present
-      run_once: true
 
     - name: Install gdeploy
       yum:
         name: gdeploy
         state: present
-      run_once: true
 
-    - name: Generate gdeploy.conf
+    - name: Generate gdeploy.conf for backend-setup
       template:
         src: gdeploy-libvirt.conf.j2
         dest: "/tmp/gdeploy.conf"
-      run_once: true
 
     - name: Run GDeploy
       shell: 'gdeploy -c /tmp/gdeploy.conf'
-      run_once: true
+
+- import_playbook: peer-probe.yml
 ...
