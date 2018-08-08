@@ -1,0 +1,8 @@
+---
+
+- name: creata volume
+  hosts: all[0]
+  become: true
+  tasks:
+    - name: Create volume from glustercli
+      shell: "glustercli volume create --name testvol 192.168.121.143:/gluster/brick1 192.168.121.19:/gluster/brick1 192.168.121.143:/gluster/brick2 192.168.121.19:/gluster/brick2 --replica 2 --force"

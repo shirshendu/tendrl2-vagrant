@@ -7,17 +7,19 @@
       systemd:
         name: glusterd2
         state: stopped
-    - name: Remove store data
+    - name: Remove gluster's etcd store data
       file:
-        path: /usr/local/var/lib/glusterd2/store
+        path: "{{ item }}"
         state: absent
+      with_items:
+        - /var/lib/glusterd2
     - name: Remove run files
       file:
         path: "{{ item }}"
         state: absent
       with_items:
-        - /usr/local/var/run/glusterd2/glusterd2.pid
-        - /usr/local/var/run/glusterd2/glusterd2.socket
+        - /var/run/glusterd2/glusterd2.pid
+        - /var/run/glusterd2/glusterd2.socket
     - name: Start glusterd2
       systemd:
         name: glusterd2
