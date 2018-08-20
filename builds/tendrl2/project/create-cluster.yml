@@ -1,0 +1,52 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+    - name: add gluster4 nightly repo
+      get_url:
+        url: http://artifacts.ci.centos.org/gluster/nightly/master.repo
+        dest: /etc/yum.repos.d/gluster-nightly-master.repo
+
+    - name: add glusterd2 nightly repo
+      get_url:
+        url: http://artifacts.ci.centos.org/gluster/gd2-nightly/gd2-master.repo
+        dest: /etc/yum.repos.d/gd2-master.repo
+
+    - name: add gluster repo (for gdeploy i.e. backend-setup)
+      yum:
+        name: centos-release-gluster
+        state: present
+
+    - name: Install GlusterFS Server
+      yum:
+        name: glusterfs-server
+        state: present
+
+    - name: Install glusterd2
+      yum:
+        name: glusterd2
+        state: present
+
+    - name: Enable GD2 service and start it
+      systemd:
+        name: glusterd2
+        daemon_reload: yes
+        state: started
+        enabled: yes
+
+    - name: Install gdeploy
+      yum:
+        name: gdeploy
+        state: present
+
+    - name: Generate gdeploy.conf for backend-setup
+      template:
+        src: gdeploy-libvirt.conf.j2
+        dest: "/tmp/gdeploy.conf"
+
+    - name: Run GDeploy
+      shell: 'gdeploy -c /tmp/gdeploy.conf'
+
+- import_playbook: peer-probe.yml
+...

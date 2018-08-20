@@ -1,0 +1,11 @@
+---
+
+- name: Peer Probe
+  hosts: all[0]
+  become: true
+  tasks:
+    - name: Run peer probe
+      shell: "glustercli peer add {{ item }}"
+      with_items: "{{ groups['all'][1:] }}"
+      ignore_errors: yes
+

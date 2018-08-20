@@ -1,0 +1,9 @@
+---
+
+- name: Install pip
+  yum:
+    name: python2-pip
+    state: present
+- name: Install ansible-runner
+  pip:
+    name: ansible-runner
