@@ -5,4 +5,6 @@
   become: true
   tasks:
     - name: Create volume from glustercli
-      shell: "glustercli volume create --name testvol 192.168.121.143:/gluster/brick1 192.168.121.19:/gluster/brick1 192.168.121.143:/gluster/brick2 192.168.121.19:/gluster/brick2 --replica 2 --force"
+      shell: "glustercli volume create --name testvol 192.168.121.56:/gluster/brick1 192.168.121.14:/gluster/brick1 192.168.121.56:/gluster/brick2 192.168.121.14:/gluster/brick2 --replica 2 --force"
+      register: gd2_res
+      failed_when: "gd2_res.rc != 0 and 'volume already exists' not in gd2_res.stderr"
