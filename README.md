@@ -1,9 +1,9 @@
-# Tendrl/api development with Vagrant
+# Tendrl/GD2 development with Vagrant
 
-A Vagrant setup for development of tendrl-api.
+A Vagrant setup for providing a ready GD2 cluster for use with development of Tendrl.
 
 This will setup as many gluster storage nodes as you want with a number of bricks that you can define!
-It works with your local tendrl-api server and tendrl-ui setup.
+It works with your local tendrl setup.
 It uses vagrant's ansible plugin, so you will need ansible (>=2.4) on your host machine.
 
 ## Requirements
@@ -63,26 +63,20 @@ It uses vagrant's ansible plugin, so you will need ansible (>=2.4) on your host 
 
 ## Get started
 * Clone this repository
-  * `git clone https://github.com/shirshendu/tendrl-vagrant.git`
+  * `git clone https://github.com/Tendrl/tendrl2-vagrant.git`
 * Goto the folder in which you cloned this repo
-  * `cd tendrl-vagrant`
+  * `cd tendrl2-vagrant`
 * if you are a returning user run `git pull` to ensure you have the latest updates
-* if you are on RHEL/Fedora and your don't want your libvirt storage domain `default` to be used, override the storage domain like this
+* If you want the default config, proceed to the next step. Else, if you are on RHEL/Fedora and your don't want your libvirt storage domain `default` to be used, override the storage domain like this:
   * `export LIBVIRT_STORAGE_POOL=images`
-* `cp tendrl.conf.yml.sample tendrl.conf.yml`
-  * Decide how many storage nodes and how many bricks you need
-  * Decide if you want vagrant to initialize the cluster (`gdeploy`) for you
-  * If you opted to initialize the cluster, decide whether you want to deploy tendrl
-  * edit options in this file
+* If you want the default config, proceed to the next step. Else, copy `tendrl.conf.yml.example` to `tendrl.conf.yml`, and configure it
 * Run `vagrant up`
-  * Wait a while
 
 ## Usage
 * *Always make sure you are in the git repo - vagrant only works in there!*
 * After `vagrant up` you can connect to each VM with `vagrant ssh` and the name of the VM you want to connect to
-* The single central server VM is called `tendrl-server`
-* Each storage node VM is called `tendrl-node-x` where x starts with 1
-  - tendrl-node-1 is your first VM and it counts up depending on the amount of VMs you spawn
+* Each storage node VM is called `gd2-x` where x starts with 1
+  - gd2-1 is your first VM and it counts up depending on the amount of VMs you spawn
 * If you get the following error:
 
 `Error while activating network: Call to virNetworkCreate failed: error creating bridge interface virbr0: File exists.`
@@ -118,10 +112,10 @@ Please try restarting `libvirtd` with `sudo systemctl restart libvirtd`
 
 If you like to clean up disk space or there are updates to the images do the following:
 
-* on VirtualBox - remove the VM instances named `packer-tendrl-server-...` and `packer-tendrl-node-...` (these are base images for the clones)
+* on VirtualBox - remove the VM instances named `packer-gd2-...` (these are base images for the clones)
 * on libvirt
   * run `virsh vol-list default` to list all images in your `default` storage pool (adjust the name if you are using a different one)
-  * run `virsh vol-delete tendrl-node-... default` and  `virsh vol-delete tendrl-server-... default` to delete the images starting with `tendrl-node-...` and `tendrl-server-...` (replace with full name) from the default pool
+  * run `virsh vol-delete gd2-... default` and  `virsh vol-delete gd2-... default` to delete the images starting with `gd2-...`(replace with full name) from the default pool
 * run `vagrant box update`
 
 Next time you do `vagrant up` it will automatically pull new images.

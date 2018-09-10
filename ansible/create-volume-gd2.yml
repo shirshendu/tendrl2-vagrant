@@ -1,10 +1,18 @@
 ---
 
-- name: creata volume
+- name: Create a volume
   hosts: all[0]
   become: true
   tasks:
+    - name: Generate brick list
+      debug:
+        msg: "{{ hostvars[item[0]]['ansible_eth0']['ipv4']['address'] }}:/gluster/brick{{ item[1] }}"
+      register: bricks
+      with_nested:
+        - "{{ groups['all'] }}"
+        - "{{ range(0, disk_count + 1)|list }}"
+
     - name: Create volume from glustercli
-      shell: "glustercli volume create --name testvol 192.168.121.56:/gluster/brick1 192.168.121.14:/gluster/brick1 192.168.121.56:/gluster/brick2 192.168.121.14:/gluster/brick2 --replica 2 --force"
+      shell: "glustercli volume create --name testvol {{ bricks.results|map(attribute='msg')|join(' ') }} --replica 2 --force"
       register: gd2_res
       failed_when: "gd2_res.rc != 0 and 'volume already exists' not in gd2_res.stderr"
