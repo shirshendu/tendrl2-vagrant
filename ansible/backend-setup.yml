@@ -1,0 +1,35 @@
+---
+- name: Setting up backend
+  hosts: all
+  become: true
+  tasks:
+    - name: Create a partition on each device
+      parted:
+        device: "/dev/vd{{ item }}"
+        number: 1
+        state: present
+      with_items:
+        - "{{ 'bcdefghijklmnopqrstuvwxyz'[0:disk_count]|list }}"
+      ignore_errors: true
+    - name: Format devices to xfs
+      filesystem:
+        fstype: xfs
+        dev: "/dev/vd{{ item }}"
+      with_items:
+        - "{{ 'bcdefghijklmnopqrstuvwxyz'[0:disk_count]|list }}"
+      ignore_errors: true
+    - name: Create brick directories for each device
+      file:
+        path: "/gluster/brick{{ item }}"
+        state: directory
+      with_items:
+        - "{{ range(1, disk_count + 1)|list }}"
+    - name: Mount bricks
+      mount:
+        path: "/gluster/brick{{item[0]}}"
+        src: "/dev/vd{{item[1]}}"
+        fstype: xfs
+        state: mounted
+      with_together:
+        - "{{ range(1, disk_count + 1)|list }}"
+        - "{{ 'bcdefghijklmnopqrstuvwxyz'[0:disk_count]|list }}"
