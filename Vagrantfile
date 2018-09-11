@@ -51,7 +51,7 @@ VMDISK = '256m'.freeze # size of brick disks in MB
 storage_node_count = -1
 disk_count = -1
 
-tendrl_conf = YAML.load_file 'tendrl2.conf.yml'
+tendrl_conf = YAML.load_file('tendrl2.conf.yml') rescue { 'storage_node_count' => 2, 'disk_count' => 2 }
 storage_node_count = tendrl_conf['storage_node_count'].to_i
 disk_count = tendrl_conf['disk_count'].to_i
 
@@ -175,6 +175,9 @@ Vagrant.configure(2) do |config|
             'gluster4-servers' => ["gd2-[1:#{storage_node_count}]"],
           }
           ansible.playbook = 'ansible/create-cluster.yml'
+          ansible.extra_vars = {
+            disk_count: disk_count
+          }
         end
 
         machine.vm.provision :refresh_gluster, type: :ansible, run: :never do |ansible|

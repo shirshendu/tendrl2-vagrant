@@ -39,7 +39,7 @@
         dest: "/tmp/gdeploy.conf"
 
     - name: Run GDeploy
-      shell: '#gdeploy -c /tmp/gdeploy.conf'
+      shell: 'gdeploy -c /tmp/gdeploy.conf'
 
     - name: Disable and stop glusterd
       systemd:
