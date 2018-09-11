@@ -13,11 +13,6 @@
         url: http://artifacts.ci.centos.org/gluster/gd2-nightly/gd2-master.repo
         dest: /etc/yum.repos.d/gd2-master.repo
 
-    - name: add gluster repo (for gdeploy i.e. backend-setup)
-      yum:
-        name: centos-release-gluster
-        state: present
-
     - name: Install GlusterFS Server
       yum:
         name: glusterfs-server
@@ -28,33 +23,19 @@
         name: glusterd2
         state: present
 
-    - name: Install gdeploy
-      yum:
-        name: gdeploy
-        state: present
+- import_playbook: backend-setup.yml
 
-    - name: Generate gdeploy.conf for backend-setup
-      template:
-        src: gdeploy-libvirt.conf.j2
-        dest: "/tmp/gdeploy.conf"
-
-    - name: Run GDeploy
-      shell: 'gdeploy -c /tmp/gdeploy.conf'
-
-    - name: Disable and stop glusterd
-      systemd:
-        name: glusterd
-        daemon_reload: yes
-        state: stopped
-        enabled: no
-
+- hosts: all
+  become: true
+  tasks:
     - name: Enable GD2 service and start it
       systemd:
         name: glusterd2
         daemon_reload: yes
         state: started
         enabled: yes
-
+    - pause:
+        seconds: 5
 - import_playbook: peer-probe.yml
 - import_playbook: create-volume-gd2.yml
 ...

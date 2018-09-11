@@ -62,6 +62,7 @@ It uses vagrant's ansible plugin, so you will need ansible (>=2.4) on your host 
     * `brew install ansible`
 
 ## Get started
+
 * Clone this repository
   * `git clone https://github.com/Tendrl/tendrl2-vagrant.git`
 * Goto the folder in which you cloned this repo
@@ -71,8 +72,17 @@ It uses vagrant's ansible plugin, so you will need ansible (>=2.4) on your host 
   * `export LIBVIRT_STORAGE_POOL=images`
 * If you want the default config, proceed to the next step. Else, copy `tendrl.conf.yml.example` to `tendrl.conf.yml`, and configure it
 * Run `vagrant up`
+* Run `vagrant provision --provision-with create_cluster`
+
+Your glusterd2 cluster is ready for use.
 
 ## Usage
+
+- You can find the IPs of your VMs using `vagrant ssh-config`
+- You can find the GD2 API at `http://<gd2-1_ipv4_add>:24007/endpoints`
+- You can ssh into VMs using `vagrant ssh gd2-1`, `vagrant ssh gd2-2` etc
+
+## More Usage
 * *Always make sure you are in the git repo - vagrant only works in there!*
 * After `vagrant up` you can connect to each VM with `vagrant ssh` and the name of the VM you want to connect to
 * Each storage node VM is called `gd2-x` where x starts with 1
@@ -89,6 +99,18 @@ Please try restarting `libvirtd` with `sudo systemctl restart libvirtd`
   * Try `vagrant -h` to find out about them
   * if you run `vagrant up` again you without running `vagrant destroy` before you will overwrite your configuration and vagrant may loose track of some VMs (it's safe to remove them manually)
 * modify the `VMMEM` and `VMCPU` variables in the Vagrant file to change the VM resources, adjust `VMDISK` to change brick device sizes
+
+## Known issues
+- Suspending/restarting GD2 VMs will lead to etcd quorum loss, i.e. the glusterd2 processes will not start without manual recovery.
+- If you don't care about recreating the cluster so long as you have a working setup, do the following:
+  - `vagrant provision --provision-with refresh_gluster`
+  - `vagrant provision --provision-with create_cluster`
+
+This is a known issue in glusterd2:
+- https://github.com/gluster/glusterd2/blob/master/doc/quick-start-user-guide.md#known-issues
+- https://github.com/gluster/glusterd2/issues/692#issuecomment-384270710
+- https://github.com/gluster/glusterd2/wiki/Recovery
+
 
 ## What happens under the covers
 * After starting the storage node VMs:
@@ -119,11 +141,6 @@ If you like to clean up disk space or there are updates to the images do the fol
 * run `vagrant box update`
 
 Next time you do `vagrant up` it will automatically pull new images.
-
-## Known issues
-* `vagrant up` overrides your state - if there are still VMs running and you do `vagrant up` it will override the `vagrant_env.conf` and vagrant will loose track of your existing VMs
-  * try to remember to run `vagrant destroy -f` before you do another `vagrant up`
-  * delete left-over VMs manually in case you forgot
 
 ## Creating your own vagrant box
 If you - for whatever reason - do not want to use my prebuilt box, you can create your own box very easy!  

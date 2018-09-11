@@ -120,7 +120,6 @@ Vagrant.configure(2) do |config|
     config.vm.define "gd2-#{node_index}" do |machine|
       # Provider-independent options
       machine.vm.hostname = "gd2-#{node_index}"
-      machine.vm.synced_folder 'builds', '/vagrant', type: "rsync"
 
       machine.vm.provider 'virtualbox' do |vb, override|
         # Make this a linked clone for cow snapshot based root disks
