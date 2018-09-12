@@ -10,7 +10,7 @@
       register: bricks
       with_nested:
         - "{{ groups['all'] }}"
-        - "{{ range(0, disk_count + 1)|list }}"
+        - "{{ range(1, disk_count + 1)|list }}"
 
     - name: Create volume from glustercli
       shell: "glustercli volume create --name testvol {{ bricks.results|map(attribute='msg')|join(' ') }} --replica 2 --force"

@@ -168,7 +168,7 @@ Vagrant.configure(2) do |config|
           ansible.playbook = 'ansible/prepare-environment.yml'
         end
 
-        machine.vm.provision :create_cluster, type: :ansible, run: :never do |ansible|
+        machine.vm.provision :create_cluster, type: :ansible do |ansible|
           ansible.limit = 'all'
           ansible.groups = {
             'gluster4-servers' => ["gd2-[1:#{storage_node_count}]"],
